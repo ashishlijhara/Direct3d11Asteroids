@@ -7,6 +7,7 @@
 #include "MatrixBuffer.h"
 #include "SpriteFontVertex.h"
 #include "SpriteFontRenderer.h"
+#include <time.h>
 #include <SpriteFont.h>
 
 FontEngine::FontEngine(const InitialisationParams &initParams) :
@@ -30,6 +31,10 @@ FontEngine::FontEngine(const InitialisationParams &initParams) :
 FontEngine::~FontEngine()
 {
 }
+
+ComPtr<ID3D11Buffer> FontEngine::pConstants = NULL;
+
+std::chrono::high_resolution_clock::time_point FontEngine::prevTime = std::chrono::high_resolution_clock::now();
 
 FontEngine *FontEngine::CreateFontEngine(ResourceLoader *resources,
 	ID3D11Device *d3dDevice,
@@ -124,6 +129,9 @@ FontEngine *FontEngine::CreateFontEngine(ResourceLoader *resources,
 
 	engineParams.d3dDeviceContext = d3dDeviceContext;
 
+	D3D11_BUFFER_DESC ConstBufferDesc = { 16, D3D11_USAGE_DEFAULT,D3D11_BIND_CONSTANT_BUFFER,0,0,0 };
+	d3dDevice->CreateBuffer(&ConstBufferDesc, NULL, pConstants.GetAddressOf());
+
 	return new FontEngine(engineParams);
 }
 
@@ -142,10 +150,12 @@ void FontEngine::DestroyFontEngine(FontEngine *engine)
 
 void FontEngine::BeginFrame()
 {
+	vertexBuffers_->BeginFrame();
 }
 
 void FontEngine::EndFrame()
 {
+	vertexBuffers_->EndFrame();
 }
 
 int FontEngine::DrawText(const std::string &text,
@@ -187,7 +197,8 @@ int FontEngine::DrawText(const std::string &text,
 		// Set up our shaders
 		vertexShader_->VSSetShader(d3dDeviceContext_);
 		pixelShader_->PSSetShader(d3dDeviceContext_);
-
+		
+		
 		// Flush constant buffers
 		modelViewProjection_->VSSetConstantBuffers(d3dDeviceContext_,
 			XMMatrixIdentity(),
@@ -197,11 +208,19 @@ int FontEngine::DrawText(const std::string &text,
 		// Font texture
 		d3dDeviceContext_->PSSetShaderResources(0, 1, &font.texture);
 		d3dDeviceContext_->PSSetSamplers(0, 1, &textureSampler_);
+		
+		//Flush Time Buffer
+		d3dDeviceContext_->PSSetConstantBuffers(0, 1, pConstants.GetAddressOf());
 
 		// Issue draw command
 		d3dDeviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		vertexBuffers_->IASetVertexBuffer(d3dDeviceContext_);
 		d3dDeviceContext_->Draw(copiedRange.end - copiedRange.begin, copiedRange.begin);
+
+		std::chrono::high_resolution_clock::time_point t = std::chrono::high_resolution_clock::now();
+		int val = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t - prevTime).count();
+		prevTime = t;
+		d3dDeviceContext_->UpdateSubresource(pConstants.Get(), 0, 0, &(val), 4, 4);
 
 		// Next line
 		lineSpacing = static_cast<int>(font.sprite->GetLineSpacing());
@@ -226,6 +245,24 @@ int FontEngine::CalculateTextWidth(const std::string &text, FontType type) const
 	}
 
 	return textWidth;
+}
+
+int FontEngine::CalculateTextHeight(const std::string &text) const
+{
+	return CalculateTextHeight(text, FONT_TYPE_DEFAULT);
+}
+
+int FontEngine::CalculateTextHeight(const std::string &text, FontType type) const
+{
+	int textHeight = 0;
+
+	FontTypeMap::const_iterator fontTypeIt = fonts_.find(type);
+	if (fontTypeIt != fonts_.end())
+	{
+		textHeight = static_cast<int>(XMVectorGetY(fontTypeIt->second.sprite->MeasureString(text.c_str())));
+	}
+
+	return textHeight;
 }
 
 FontEngine::Font FontEngine::CreateFont(ID3D11Device *d3dDevice, uint8_t *data, uint32_t size)

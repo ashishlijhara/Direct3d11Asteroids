@@ -5,8 +5,11 @@
 #include <DirectXMath.h>
 #include <string>
 #include <map>
+#include <chrono>
+#include <wrl.h>
 
 using namespace DirectX;
+using namespace Microsoft::WRL;
 
 namespace DirectX
 {
@@ -54,6 +57,10 @@ public:
 	int CalculateTextWidth(const std::string &text) const;
 	int CalculateTextWidth(const std::string &text, FontType type) const;
 
+	//Font Height Calculation
+	int CalculateTextHeight(const std::string &text) const;
+	int CalculateTextHeight(const std::string &text, FontType type) const;
+
 private:
 
 	struct Font
@@ -93,6 +100,10 @@ private:
 	FontTypeMap fonts_;
 
 	XMFLOAT4X4 projectionMatrix_;
+
+	//pass time to pixelShader
+	static ComPtr<ID3D11Buffer> pConstants;
+	static std::chrono::high_resolution_clock::time_point prevTime;
 };
 
 #endif // FONTENGINE_H_INCLUDED

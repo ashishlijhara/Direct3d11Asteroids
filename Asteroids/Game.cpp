@@ -10,13 +10,22 @@
 #include "Maths.h"
 #include "Bullet.h"
 #include "Collision.h"
+#include "FontEngine.h"
+#include "Graphics.h"
+#include <crtdbg.h>
+#include <string>
 #include <algorithm>
 
 Game::Game() :
 	camera_(0),
 	background_(0),
 	player_(0),
-	collision_(0)
+	collision_(0),
+	//bullet_(0)
+	elapsedTime_(0),
+	spawnBulletAfter_(1),
+	shootMode_(ShootMode::Single),
+	score_(0)
 {
 	camera_ = new OrthoCamera();
 	camera_->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -30,17 +39,23 @@ Game::~Game()
 	delete camera_;
 	delete background_;
 	delete player_;
-	DeleteBullet();
+	//DeleteBullet();
+	DeleteAllBullets();
 	DeleteAllAsteroids();
 	DeleteAllExplosions();
 	delete collision_;
 }
+
+const int& Game::GetScore() { return score_; }
+
+void Game::ResetScore() { score_ = 0; }
 
 void Game::Update(System *system)
 {
 	UpdatePlayer(system);
 	UpdateAsteroids(system);
 	UpdateBullet(system);
+	UpdateExplosions(system);
 	UpdateCollisions();
 }
 
@@ -59,6 +74,8 @@ void Game::RenderEverything(Graphics *graphics)
 	if (player_)
 	{
 		player_->Render(graphics);
+		RenderPlayerLives(graphics);
+		RenderScore(graphics);
 	}
 
 	for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
@@ -69,10 +86,14 @@ void Game::RenderEverything(Graphics *graphics)
 		(*asteroidIt)->Render(graphics);
 	}
 
-	if (bullet_)
+	for (BulletList::const_iterator bulletIt = bullets_.begin(),end = bullets_.end();
+		bulletIt != end;
+		++bulletIt)
 	{
-		bullet_->Render(graphics);
+		if (IsBullet(*bulletIt))
+			(*bulletIt)->Render(graphics);
 	}
+		//bullet_->Render(graphics);
 
 	for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
 		end = explosions_.end();
@@ -83,10 +104,42 @@ void Game::RenderEverything(Graphics *graphics)
 	}
 }
 
+void Game::RenderPlayerLives(Graphics *graphics)  const
+{
+	FontEngine *fontEngine = graphics->GetFontEngine();
+
+	char lives[10] = "Lives: ";
+	char lifeint[2];
+	sprintf_s(lifeint, sizeof(lifeint),"%d",player_->PlayerLives());
+	strcat_s(lives, lifeint);
+	const char *livesText = lives;
+	int textWidth = fontEngine->CalculateTextWidth(livesText, FontEngine::FONT_TYPE_SMALL);
+	int textX = textWidth-10;
+	int textY = 22;
+	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
+}
+
+void Game::RenderScore(Graphics *graphics)  const
+{
+	FontEngine *fontEngine = graphics->GetFontEngine();
+
+	char score[10] = "Score: ";
+	char scoreint[4];
+	sprintf_s(scoreint, sizeof(scoreint), "%d", score_);
+	strcat_s(score, scoreint);
+	const char *livesText = score;
+	int textWidth = fontEngine->CalculateTextWidth(livesText, FontEngine::FONT_TYPE_SMALL);
+	int textX = 800 - textWidth*2;
+	int textY = 22;
+	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
+}
+
 void Game::InitialiseLevel(int numAsteroids)
 {
 	DeleteAllAsteroids();
 	DeleteAllExplosions();
+	//DeleteBullets on Screen
+	DeleteAllBullets();
 
 	SpawnPlayer();
 	SpawnAsteroids(numAsteroids);
@@ -102,23 +155,39 @@ bool Game::IsGameOver() const
 	return (player_ == 0 && explosions_.empty());
 }
 
+bool Game::IsBullet(GameEntity *entity) const
+{
+	return (std::find(bullets_.begin(), bullets_.end(), entity) != bullets_.end());
+}
+
 void Game::DoCollision(GameEntity *a, GameEntity *b)
 {
 	Ship *player = static_cast<Ship *>(a == player_ ? a : (b == player_ ? b : 0));
-	Bullet *bullet = static_cast<Bullet *>(a == bullet_ ? a : (b == bullet_ ? b : 0));
+	Bullet *bullet = static_cast<Bullet *>(IsBullet(a) ? a : ((IsBullet(b)) ? b : 0));
+	//Bullet *bullet = static_cast<Bullet *>(a == bullet_ ? a : (b == bullet_ ? b : 0));
 	Asteroid *asteroid = static_cast<Asteroid *>(IsAsteroid(a) ? a : (IsAsteroid(b) ? b : 0));
 
 	if (player && asteroid)
 	{
 		AsteroidHit(asteroid);
-		DeletePlayer();
+		//DeletePlayer();
+		TaxPlayerLives();
 	}
 
 	if (bullet && asteroid)
 	{
 		AsteroidHit(asteroid);
-		DeleteBullet();
+		DeleteBullet(bullet);
 	}
+}
+
+void Game::TaxPlayerLives() {
+	int lives = player_->PlayerLives(true);
+	if (lives == 0) {
+		DeletePlayer();
+		return;
+	}
+	player_->Reset();
 }
 
 void Game::SpawnPlayer()
@@ -165,12 +234,61 @@ void Game::UpdatePlayer(System *system)
 	player_->Update(system);
 	WrapEntity(player_);
 
-	if (keyboard->IsKeyPressed(VK_SPACE))
+	//Switch Shoot Modes
+	if (keyboard->IsKeyPressed(VK_NUMPAD1)) {
+		shootMode_ = ShootMode::Single;
+		spawnBulletAfter_ = 1;
+	}
+	else if (keyboard->IsKeyPressed(VK_NUMPAD2)) {
+		shootMode_ = ShootMode::Spiral;
+		spawnBulletAfter_ = 0.25;
+	}
+	else if (keyboard->IsKeyPressed(VK_NUMPAD3)) {
+		shootMode_ = ShootMode::MultiSpiral;
+		spawnBulletAfter_ = 0.05;
+	}
+	else if (keyboard->IsKeyPressed(VK_NUMPAD4)) {
+		shootMode_ = ShootMode::Three;
+		spawnBulletAfter_ = 0.5;
+	}
+
+	//if (keyboard->IsKeyPressed(VK_SPACE))
+	//if(keyboard->IsKeyHeld(VK_SPACE) && (elapsedTime_>spawnBulletAfter_))
+	if ((keyboard->IsKeyHeld(VK_LBUTTON) || keyboard->IsKeyHeld(VK_SPACE)) && (elapsedTime_ > spawnBulletAfter_))
 	{
+		elapsedTime_ = 0;
 		XMVECTOR playerForward = player_->GetForwardVector();
 		XMVECTOR bulletPosition = player_->GetPosition() + playerForward * 10.0f;
-		SpawnBullet(bulletPosition, playerForward);
+		switch (shootMode_)
+		{
+		case ShootMode::Single:
+			SpawnBullet(bulletPosition, playerForward);
+			break;
+		case ShootMode::Spiral:
+			shootRot_ += 25;
+			SpawnBullet(bulletPosition, RotateVectorBy(shootRot_));
+			break;
+		case ShootMode::MultiSpiral:
+			shootRot_ += 1.5;
+			SpawnBullet(bulletPosition, RotateVectorBy(shootRot_));
+			break;
+		case ShootMode::Three:
+			SpawnBullet(bulletPosition, playerForward);
+			SpawnBullet(bulletPosition,RotateVectorBy(45));
+			SpawnBullet(bulletPosition, RotateVectorBy(-45));
+			break;
+		}
 	}
+	elapsedTime_ += (double)system->GetFrameDeltaTime()/100;
+}
+
+XMVECTOR Game::RotateVectorBy(float angle) const{
+	float rotation = Maths::WrapModulo(player_->GetRotation() + angle, Maths::TWO_PI);
+	XMFLOAT3 playerLeft;
+	XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation);
+	XMVECTOR rotatedVec = XMVector3TransformNormal(XMVectorSet(0.f, 1.0f, 0.0f, 0.0f), rotationMatrix);
+	rotatedVec = XMVector3Normalize(rotatedVec);
+	return rotatedVec;
 }
 
 void Game::UpdateAsteroids(System *system)
@@ -187,10 +305,36 @@ void Game::UpdateAsteroids(System *system)
 
 void Game::UpdateBullet(System *system)
 {
-	if (bullet_)
+	BulletList bulletList_(bullets_.begin(), bullets_.end());
+	for (BulletList::const_iterator bulletIt = bulletList_.begin(),end = bulletList_.end();
+		bulletIt != end;
+		++bulletIt)
+	{
+		(*bulletIt)->Update(system);
+		WrapEntity(*bulletIt);
+		
+		if ((*bulletIt)->HasCompletedLifeSpan())
+			DeleteBullet(*bulletIt);
+	}
+
+	/*if (bullet_)
 	{
 		bullet_->Update(system);
 		WrapEntity(bullet_);
+	}*/
+}
+
+void Game::UpdateExplosions(System* system) {
+	ExplosionList explosionList(explosions_.begin(), explosions_.end());
+	for (ExplosionList::const_iterator explosionIt = explosionList.begin(),
+		end = explosionList.end();
+		explosionIt != end;
+		++explosionIt)
+	{
+		(*explosionIt)->Update(system);
+		if ((*explosionIt)->HasCompleteLifeSpan()) {
+			DeleteExplosion(*explosionIt);
+		}
 	}
 }
 
@@ -225,21 +369,43 @@ void Game::DeleteAllExplosions()
 	{
 		delete (*explosionIt);
 	}
-
 	explosions_.clear();
 }
 
 void Game::SpawnBullet(XMVECTOR position, XMVECTOR direction)
 {
-	DeleteBullet();
-	bullet_ = new Bullet(position, direction);
+	//DeleteBullet();
+	Bullet *bullet_ = new Bullet(position, direction);
 	bullet_->EnableCollisions(collision_, 3.0f);
+	bullets_.push_back(bullet_);
 }
 
-void Game::DeleteBullet()
+void Game::DeleteAllBullets()
 {
-	delete bullet_;
-	bullet_ = 0;
+	for (BulletList::const_iterator bulletIt = bullets_.begin(), end = bullets_.end();
+		bulletIt != end;
+		++bulletIt)
+	{
+
+		delete (*bulletIt);
+	}
+
+	bullets_.clear();
+
+	/*delete bullet_;
+	bullet_ = 0;*/
+}
+
+
+void Game::DeleteBullet( Bullet *bullet)
+{
+		bullets_.remove(bullet);
+		delete bullet;
+}
+
+void Game::DeleteExplosion(Explosion* explosion) {
+	explosions_.remove(explosion);
+	delete explosion;
 }
 
 void Game::SpawnAsteroids(int numAsteroids)
@@ -285,11 +451,13 @@ void Game::AsteroidHit(Asteroid *asteroid)
 		SpawnAsteroidAt(position, smallerSize);
 		SpawnAsteroidAt(position, smallerSize);
 	}
+	explosions_.push_back(new Explosion(asteroid->GetPosition()));
 	DeleteAsteroid(asteroid);
 }
 
 void Game::DeleteAsteroid(Asteroid *asteroid)
 {
+	score_++;
 	asteroids_.remove(asteroid);
 	delete asteroid;
 }

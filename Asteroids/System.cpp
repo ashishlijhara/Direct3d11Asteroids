@@ -8,6 +8,7 @@
 #include "GameState.h"
 #include "Game.h"
 
+
 System::System(HINSTANCE hInstance) :
 	moduleInstance_(hInstance),
 	mainWindow_(0),
@@ -19,7 +20,8 @@ System::System(HINSTANCE hInstance) :
 	keyboard_(0),
 	currentState_(0),
 	nextState_(0),
-	game_(0)
+	game_(0),
+	scoreKeeper_(0)
 {
 }
 
@@ -36,6 +38,7 @@ void System::Initialise()
 	stateLibrary_ = new StateLibrary();
 	keyboard_ = new Keyboard();
 	game_ = new Game();
+	scoreKeeper_ = Score::GetScoreKeeper();
 }
 
 void System::Test()
@@ -80,7 +83,20 @@ void System::Terminate()
 
 	delete mainWindow_;
 	mainWindow_ = 0;
+
+	Score::DestroyScoreKeeper();
+	scoreKeeper_ = 0;
 }
+
+void System::SetScore(const int& level, const int& score) const
+{
+	scoreKeeper_->UpdateScore(level, score);
+}
+
+void System::SaveHighScoreTable() const {
+	scoreKeeper_->SetHighScore();
+}
+
 
 ResourceLoader *System::GetResourceLoader() const
 {
@@ -161,10 +177,19 @@ void System::SwapState()
 
 void System::Update()
 {
+	old = newTime;
+	
 	assetLoader_->Update();
 	keyboard_->Update();
 	currentState_->OnUpdate(this);
 	Sleep(1);
+	newTime = std::chrono::high_resolution_clock::now();
+	deltaTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(newTime - old).count();
+}
+
+long long System::GetFrameDeltaTime() const 
+{
+	return deltaTime_;
 }
 
 void System::Render()

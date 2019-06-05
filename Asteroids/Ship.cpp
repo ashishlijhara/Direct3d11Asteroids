@@ -10,8 +10,15 @@ Ship::Ship() :
 	rotationControl_(0.0f),
 	velocity_(XMFLOAT3(0.0f, 0.0f, 0.0f)),
 	forward_(XMFLOAT3(0.0f, 1.0f, 0.0f)),
-	rotation_(0.0f) //**TODO: Candidate for crash
+	rotation_(0.0f), //**TODO: Candidate for crash
+	numLives_(3)
 {
+}
+
+int Ship::PlayerLives(bool decrement) {
+	if (decrement)
+		numLives_--;
+	return numLives_;
 }
 
 void Ship::SetControlInput(float acceleration,
@@ -93,4 +100,9 @@ void Ship::Reset()
 	rotation_ = 0.0f;
 
 	SetPosition(XMVectorZero());
+}
+
+float Ship::GetRotation() const
+{
+	return rotation_;
 }

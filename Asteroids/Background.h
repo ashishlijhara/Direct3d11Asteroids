@@ -14,6 +14,8 @@ public:
 
 private:
 
+	const float& Gaussian(const float& mu, const float& sigma,const float& val)const;
+
 	enum { NUM_STARS = 256 };
 
 	ImmediateModeVertex stars_[NUM_STARS];

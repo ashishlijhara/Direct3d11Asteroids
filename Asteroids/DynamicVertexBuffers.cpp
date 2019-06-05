@@ -101,7 +101,9 @@ bool DynamicVertexBuffers::CopyVertexData(const void *vertices,
 	copiedRange->begin = currentBufferSize_;
 	copiedRange->end = currentBufferSize_ + vertexCount;
 
+
 	// Update space used
+	//adding vertexCount every frame causes the font engine to stop rendering!
 	currentBufferSize_ += vertexCount;
 
 	return true;

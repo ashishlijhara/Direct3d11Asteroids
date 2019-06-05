@@ -88,6 +88,7 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="DynamicVertexBuffers.cpp" />
     <ClCompile Include="FontEngine.cpp" />
+    <ClCompile Include="HighScore.cpp" />
     <ClCompile Include="ImmediateMode.cpp" />
     <ClCompile Include="Maths.cpp" />
     <ClCompile Include="MatrixBuffer.cpp" />
@@ -109,6 +110,7 @@
     <ClCompile Include="PlayingState.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
+    <ClCompile Include="Score.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="SpriteFontRenderer.cpp" />
     <ClCompile Include="StateLibrary.cpp" />
@@ -125,6 +127,7 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="DynamicVertexBuffers.h" />
     <ClInclude Include="FontEngine.h" />
+    <ClInclude Include="HighScore.h" />
     <ClInclude Include="ImmediateMode.h" />
     <ClInclude Include="ImmediateModeVertex.h" />
     <ClInclude Include="Maths.h" />
@@ -147,6 +150,7 @@
     <ClInclude Include="Random.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceLoader.h" />
+    <ClInclude Include="Score.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="SpriteFontRenderer.h" />
     <ClInclude Include="SpriteFontVertex.h" />

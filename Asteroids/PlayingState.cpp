@@ -26,10 +26,12 @@ void PlayingState::OnUpdate(System *system)
 	{
 		StateArgumentMap args;
 		args["Level"].asInt = level_ + 1;
+		system->SetScore(level_+1, game->GetScore());
 		system->SetNextState("LevelStart", args);
 	}
 	else if (game->IsGameOver())
 	{
+		system->SetScore(level_, game->GetScore());
 		system->SetNextState("GameOver");
 	}
 }

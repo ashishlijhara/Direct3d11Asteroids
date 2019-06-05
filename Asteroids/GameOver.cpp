@@ -18,7 +18,9 @@ void GameOver::OnUpdate(System *system)
 {
 	if (--delay_ == 0)
 	{
-		system->SetNextState("MainMenu");
+		//system->SetNextState("MainMenu");
+		system->SaveHighScoreTable();
+		system->SetNextState("HighScore");
 	}
 }
 

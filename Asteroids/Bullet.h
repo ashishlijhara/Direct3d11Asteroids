@@ -11,11 +11,13 @@ public:
 
 	void Update(System *system);
 	void Render(Graphics *graphics) const;
+	bool HasCompletedLifeSpan();
 
 private:
 
 	XMFLOAT3 velocity_;
-
+	const double lifeSpan_ = 0.5;
+	double timeActive_; 
 };
 
 #endif // BULLET_H_INCLUDED

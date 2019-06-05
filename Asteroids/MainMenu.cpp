@@ -25,6 +25,10 @@ void MainMenu::OnUpdate(System *system)
 		GameState::StateArgumentMap args;
 		args["Level"].asInt = 1;
 		system->SetNextState("LevelStart", args);
+		
+		//Scoring Logic
+		system->GetGame()->ResetScore();
+		system->SetScore(1, 0);
 	}
 }
 

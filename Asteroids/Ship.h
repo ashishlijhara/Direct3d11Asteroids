@@ -19,7 +19,12 @@ public:
 	XMVECTOR GetForwardVector() const;
 	XMVECTOR GetVelocity() const;
 
+	float GetRotation() const;
+
 	void Reset();
+
+	//PlayerLives Logic.
+	int PlayerLives(bool decrement = false);
 
 private:
 
@@ -29,7 +34,7 @@ private:
 	XMFLOAT3 velocity_;
 	XMFLOAT3 forward_;
 	float rotation_;
-
+	int numLives_;
 };
 
 #endif // SHIP_H_INCLUDED

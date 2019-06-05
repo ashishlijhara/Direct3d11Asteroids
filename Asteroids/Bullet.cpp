@@ -2,9 +2,11 @@
 #include "Graphics.h"
 #include "ImmediateMode.h"
 #include "ImmediateModeVertex.h"
+#include "System.h" //Include System
 
-Bullet::Bullet(XMVECTOR position,
-	XMVECTOR direction)
+Bullet::Bullet
+(XMVECTOR position,
+	XMVECTOR direction) : timeActive_(0)
 {
 	const float BULLET_SPEED = 4.0f;
 
@@ -13,11 +15,16 @@ Bullet::Bullet(XMVECTOR position,
 	XMStoreFloat3(&velocity_, normalisedDirection * BULLET_SPEED);
 }
 
+bool Bullet::HasCompletedLifeSpan() {
+	return (timeActive_ >= lifeSpan_);
+}
+
 void Bullet::Update(System *system)
 {
 	XMVECTOR position = GetPosition();
 	position = XMVectorAdd(position, XMLoadFloat3(&velocity_));
 	SetPosition(position);
+  	timeActive_+= (double)system->GetFrameDeltaTime() / 1000;
 }
 
 void Bullet::Render(Graphics *graphics) const

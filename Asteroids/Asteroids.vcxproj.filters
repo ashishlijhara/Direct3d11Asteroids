@@ -126,6 +126,8 @@
     <ClCompile Include="FontEngine.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Score.cpp" />
+    <ClCompile Include="HighScore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
@@ -237,6 +239,8 @@
     <ClInclude Include="FontEngine.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Score.h" />
+    <ClInclude Include="HighScore.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader_FvfXyzDiffuse.hlsl">

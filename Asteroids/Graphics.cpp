@@ -3,6 +3,7 @@
 #include "ImmediateMode.h"
 #include "FontEngine.h"
 
+
 Graphics::Graphics(const InitialisationParams &initParams) :
 	dxgiSwapChain_(initParams.dxgiSwapChain),
 	d3dDevice_(initParams.d3dDevice),

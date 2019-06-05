@@ -33,6 +33,8 @@ public:
 
 	void DoCollision(GameEntity *a, GameEntity *b);
 
+	const int& GetScore();
+	void ResetScore();
 private:
 	Game(const Game &);
 	void operator=(const Game &);
@@ -46,13 +48,17 @@ private:
 	void UpdatePlayer(System *system);
 	void UpdateAsteroids(System *system);
 	void UpdateBullet(System *system);
+	//Update Explosions
+	void UpdateExplosions(System* system);
+
 	void WrapEntity(GameEntity *entity) const;
 
 	void DeleteAllAsteroids();
 	void DeleteAllExplosions();
 
 	void SpawnBullet(XMVECTOR position, XMVECTOR direction);
-	void DeleteBullet();
+	void DeleteExplosion(Explosion* explosion);
+	//void DeleteBullet();
 
 	void SpawnAsteroids(int numAsteroids);
 	void SpawnAsteroidAt(XMVECTOR position, int size);
@@ -62,15 +68,50 @@ private:
 
 	void UpdateCollisions();
 
+	bool IsBullet(GameEntity *entity) const;
+
+	//Decrease Player Lives
+	void TaxPlayerLives();
+	void RenderPlayerLives(Graphics *graphics) const;
+
 	OrthoCamera *camera_;
 
 	Background *background_;
 	Ship *player_;
-	Bullet *bullet_;
+	//Object removed. See Bullet Logic below.
+	//Bullet *bullet_;
 	AsteroidList asteroids_;
 	ExplosionList explosions_;
 
 	Collision *collision_;
+
+	// Bullet Logic
+	typedef std::list<Bullet *> BulletList;
+	BulletList bullets_;
+	
+	void DeleteBullet(Bullet *bullet);
+	void DeleteAllBullets();
+
+	double spawnBulletAfter_;
+	double elapsedTime_;
+
+
+	// Bullet Shoot Mode Logic
+	enum ShootMode {
+		Single,
+		Spiral,
+		MultiSpiral,
+		Three
+	};
+
+	ShootMode shootMode_;
+	float shootRot_ = 0;
+	XMVECTOR RotateVectorBy(float angle) const;
+
+	//Score Logic
+	int score_;
+
+	void RenderScore(Graphics * graphics) const;
 };
 
 #endif // GAME_H_INCLUDED
