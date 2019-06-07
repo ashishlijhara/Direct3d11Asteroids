@@ -115,6 +115,7 @@
     <ClCompile Include="SpriteFontRenderer.cpp" />
     <ClCompile Include="StateLibrary.cpp" />
     <ClCompile Include="System.cpp" />
+    <ClCompile Include="UFO.cpp" />
     <ClCompile Include="VertexShader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +157,7 @@
     <ClInclude Include="SpriteFontVertex.h" />
     <ClInclude Include="StateLibrary.h" />
     <ClInclude Include="System.h" />
+    <ClInclude Include="UFO.h" />
     <ClInclude Include="VertexShader.h" />
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@
 #include "OrthoCamera.h"
 #include "Background.h"
 #include "Ship.h"
+#include "UFO.h"
 #include "Asteroid.h"
 #include "Explosion.h"
 #include "Keyboard.h"
@@ -25,7 +26,8 @@ Game::Game() :
 	elapsedTime_(0),
 	spawnBulletAfter_(1),
 	shootMode_(ShootMode::Single),
-	score_(0)
+	score_(0),
+	ufo_(0)
 {
 	camera_ = new OrthoCamera();
 	camera_->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -39,6 +41,7 @@ Game::~Game()
 	delete camera_;
 	delete background_;
 	delete player_;
+	delete ufo_;
 	//DeleteBullet();
 	DeleteAllBullets();
 	DeleteAllAsteroids();
@@ -56,7 +59,9 @@ void Game::Update(System *system)
 	UpdateAsteroids(system);
 	UpdateBullet(system);
 	UpdateExplosions(system);
+	UpdateUFO(system);
 	UpdateCollisions();
+
 }
 
 void Game::RenderBackgroundOnly(Graphics *graphics)
@@ -102,6 +107,10 @@ void Game::RenderEverything(Graphics *graphics)
 	{
 		(*explosionIt)->Render(graphics);
 	}
+
+	if (ufo_) {
+		ufo_->Render(graphics);
+	}
 }
 
 void Game::RenderPlayerLives(Graphics *graphics)  const
@@ -134,8 +143,9 @@ void Game::RenderScore(Graphics *graphics)  const
 	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
 }
 
-void Game::InitialiseLevel(int numAsteroids)
+void Game::InitialiseLevel(int level)
 {
+	int numAsteroids = level;
 	DeleteAllAsteroids();
 	DeleteAllExplosions();
 	//DeleteBullets on Screen
@@ -143,6 +153,7 @@ void Game::InitialiseLevel(int numAsteroids)
 
 	SpawnPlayer();
 	SpawnAsteroids(numAsteroids);
+	SpawnUFO(level);
 }
 
 bool Game::IsLevelComplete() const
@@ -166,6 +177,7 @@ void Game::DoCollision(GameEntity *a, GameEntity *b)
 	Bullet *bullet = static_cast<Bullet *>(IsBullet(a) ? a : ((IsBullet(b)) ? b : 0));
 	//Bullet *bullet = static_cast<Bullet *>(a == bullet_ ? a : (b == bullet_ ? b : 0));
 	Asteroid *asteroid = static_cast<Asteroid *>(IsAsteroid(a) ? a : (IsAsteroid(b) ? b : 0));
+	UFO* ufo = static_cast<UFO*>(a == ufo_ ? a : (b == ufo_ ? b : 0));
 
 	if (player && asteroid)
 	{
@@ -176,8 +188,27 @@ void Game::DoCollision(GameEntity *a, GameEntity *b)
 
 	if (bullet && asteroid)
 	{
+		score_++;
 		AsteroidHit(asteroid);
 		DeleteBullet(bullet);
+	}
+
+	if (player && ufo) 
+	{
+		TaxPlayerLives();
+		DeleteUFO();
+	}
+	
+	if (asteroid && ufo)
+	{
+		//UFO Has the ability of going through Asteroids.
+		ufo->SetBlueMode(true);
+	}
+
+	if (bullet && ufo)
+	{
+		score_++;
+		DeleteUFO();
 	}
 }
 
@@ -196,6 +227,8 @@ void Game::SpawnPlayer()
 	player_ = new Ship();
 	player_->EnableCollisions(collision_, 10.0f);
 }
+
+
 
 void Game::DeletePlayer()
 {
@@ -421,6 +454,37 @@ void Game::SpawnAsteroids(int numAsteroids)
 	}
 }
 
+void Game::SpawnUFO(const int &level) {
+	DeleteUFO();
+	if (level % 2 == 0) {
+		float width = 800.0f;
+		float height = 600.0f;
+		float x = Random::GetFloat(-width, width);
+		float y = Random::GetFloat(-height, height);
+		XMVECTOR position = XMVectorSet(x, y, 0.0f, 0.0f);
+		float angle = Random::GetFloat(Maths::TWO_PI);
+		XMMATRIX randomRotation = XMMatrixRotationZ(angle);
+		float velocity = 0.5f+level/2;
+		ufo_ = new UFO(position, velocity, 1, player_);
+		ufo_->EnableCollisions(collision_, 1.5f);
+	}
+}
+
+void Game::UpdateUFO(System *system)
+{
+	if (ufo_) 
+	{
+		ufo_->Update(system);
+	}
+}
+
+void Game::DeleteUFO()
+{
+		delete ufo_;
+		ufo_ = 0;
+}
+
+
 void Game::SpawnAsteroidAt(XMVECTOR position, int size)
 {
 	const float MAX_ASTEROID_SPEED = 1.0f;
@@ -457,7 +521,6 @@ void Game::AsteroidHit(Asteroid *asteroid)
 
 void Game::DeleteAsteroid(Asteroid *asteroid)
 {
-	score_++;
 	asteroids_.remove(asteroid);
 	delete asteroid;
 }

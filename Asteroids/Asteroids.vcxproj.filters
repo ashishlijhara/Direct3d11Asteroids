@@ -128,6 +128,7 @@
     </ClCompile>
     <ClCompile Include="Score.cpp" />
     <ClCompile Include="HighScore.cpp" />
+    <ClCompile Include="UFO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
@@ -241,6 +242,7 @@
     </ClInclude>
     <ClInclude Include="Score.h" />
     <ClInclude Include="HighScore.h" />
+    <ClInclude Include="UFO.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader_FvfXyzDiffuse.hlsl">

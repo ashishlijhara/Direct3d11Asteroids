@@ -16,6 +16,7 @@ class Collision;
 class System;
 class Graphics;
 class GameEntity;
+class UFO;
 
 class Game
 {
@@ -112,6 +113,12 @@ private:
 	int score_;
 
 	void RenderScore(Graphics * graphics) const;
+
+	//UFO Logic
+	UFO *ufo_;
+	void SpawnUFO(const int&);
+	void DeleteUFO();
+	void UpdateUFO(System *system);
 };
 
 #endif // GAME_H_INCLUDED
