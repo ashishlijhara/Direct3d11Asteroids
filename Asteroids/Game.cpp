@@ -55,6 +55,7 @@ void Game::ResetScore() { score_ = 0; }
 
 void Game::Update(System *system)
 {
+	
 	background_->Update(system);
 	UpdatePlayer(system);
 	UpdateAsteroids(system);

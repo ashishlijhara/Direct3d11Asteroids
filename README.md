@@ -11,3 +11,4 @@ Use Visual Studio (VS) 2017 or later. Was Developed With VS 2017 Community Editi
 ### Play
 W,A,S,D or arrow Keys - Move
 Space or Left Mouse Button - Shoot
+Numpad 1, Numpad 2, Numpad 3, Numpad 4 - Switch weapons.
