@@ -55,6 +55,7 @@ void Game::ResetScore() { score_ = 0; }
 
 void Game::Update(System *system)
 {
+	background_->Update(system);
 	UpdatePlayer(system);
 	UpdateAsteroids(system);
 	UpdateBullet(system);
@@ -66,6 +67,7 @@ void Game::Update(System *system)
 
 void Game::RenderBackgroundOnly(Graphics *graphics)
 {
+	background_->UpdateMU(Random::GetFloat(0.84f, 0.85f));
 	camera_->SetAsView(graphics);
 	background_->Render(graphics);
 }
@@ -128,7 +130,7 @@ void Game::RenderPlayerLives(Graphics *graphics)  const
 	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
 }
 
-void Game::RenderScore(Graphics *graphics)  const
+void Game::RenderScore(const Graphics *const graphics)  const
 {
 	FontEngine *fontEngine = graphics->GetFontEngine();
 
@@ -315,7 +317,7 @@ void Game::UpdatePlayer(System *system)
 	elapsedTime_ += (double)system->GetFrameDeltaTime()/100;
 }
 
-XMVECTOR Game::RotateVectorBy(float angle) const{
+XMVECTOR Game::RotateVectorBy(const float& angle) const{
 	float rotation = Maths::WrapModulo(player_->GetRotation() + angle, Maths::TWO_PI);
 	XMFLOAT3 playerLeft;
 	XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation);

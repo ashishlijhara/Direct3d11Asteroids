@@ -107,12 +107,12 @@ private:
 
 	ShootMode shootMode_;
 	float shootRot_ = 0;
-	XMVECTOR RotateVectorBy(float angle) const;
+	XMVECTOR RotateVectorBy(const float& angle) const;
 
 	//Score Logic
 	int score_;
 
-	void RenderScore(Graphics * graphics) const;
+	void RenderScore(const Graphics *const graphics) const;
 
 	//UFO Logic
 	UFO *ufo_;

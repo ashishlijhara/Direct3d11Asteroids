@@ -11,15 +11,16 @@ public:
 
 	void Update(System *system);
 	void Render(Graphics *graphics) const;
-
+	void UpdateMU(const float& mu);
+	
 private:
 
 	const float& Gaussian(const float& mu, const float& sigma,const float& val)const;
-
 	enum { NUM_STARS = 256 };
-
+	void UpdateStars();
 	ImmediateModeVertex stars_[NUM_STARS];
-
+	float mu_;
+	float width_, height_;
 };
 
 #endif // BACKGROUND_H_INCLUDED
