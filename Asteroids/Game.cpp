@@ -132,7 +132,7 @@ void Game::RenderScore(Graphics *graphics)  const
 {
 	FontEngine *fontEngine = graphics->GetFontEngine();
 
-	char score[10] = "Score: ";
+	char score[1000] = "Score: ";
 	char scoreint[4];
 	sprintf_s(scoreint, sizeof(scoreint), "%d", score_);
 	strcat_s(score, scoreint);
@@ -158,7 +158,7 @@ void Game::InitialiseLevel(int level)
 
 bool Game::IsLevelComplete() const
 {
-	return (asteroids_.empty() && explosions_.empty());
+	return (asteroids_.empty() && explosions_.empty() && !ufo_);
 }
 
 bool Game::IsGameOver() const
