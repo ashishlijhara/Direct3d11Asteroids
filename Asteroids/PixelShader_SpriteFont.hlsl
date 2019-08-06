@@ -1,6 +1,6 @@
 Texture2D fontTexture;
 SamplerState fontSampler;
-cbuffer mybuffer { int time; }
+cbuffer mybuffer { float time; }
 static float threshold = 0; //angle threshold.
 static float offset = 0.0045f; //Offset the UV coordinates of font.
 
@@ -14,7 +14,7 @@ struct PS_INPUT
 float pingpong(float val1, float val2) {
 	float length = (val2 - val1);
 	float L = 2 * length;
-	float T = fmod((float)time/50, L);
+	float T = fmod(time/50, L);
 	if (0 < T && T < length)
 		return T;
 	return L - T;
@@ -24,7 +24,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 {
 	float textureSizeX, textureSizeY;
 	fontTexture.GetDimensions(textureSizeX, textureSizeY);
-	threshold += (float)time/50;
+	threshold += time/50;
 	if (threshold >= 360)
 		threshold = 0;
 	float4 color = input.Colour * fontTexture.Sample(fontSampler, input.Uv / float2(textureSizeX, textureSizeY));

@@ -101,8 +101,6 @@ void Game::RenderEverything(Graphics *graphics)
 		if (IsBullet(*bulletIt))
 			(*bulletIt)->Render(graphics);
 	}
-		//bullet_->Render(graphics);
-
 	for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
 		end = explosions_.end();
 		explosionIt != end;
@@ -119,32 +117,26 @@ void Game::RenderEverything(Graphics *graphics)
 void Game::RenderPlayerLives(Graphics *graphics)  const
 {
 	FontEngine *fontEngine = graphics->GetFontEngine();
+	std::string lives = "Lives: "+ to_string(player_->PlayerLives());
 
-	char lives[10] = "Lives: ";
-	char lifeint[2];
-	sprintf_s(lifeint, sizeof(lifeint),"%d",player_->PlayerLives());
-	strcat_s(lives, lifeint);
-	const char *livesText = lives;
-	int textWidth = fontEngine->CalculateTextWidth(livesText, FontEngine::FONT_TYPE_SMALL);
+	int textWidth = fontEngine->CalculateTextWidth(lives, FontEngine::FONT_TYPE_SMALL);
 	int textX = textWidth-10;
 	int textY = 22;
-	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
+	fontEngine->DrawText(lives, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
 }
 
 void Game::RenderScore(const Graphics *const graphics)  const
 {
 	FontEngine *fontEngine = graphics->GetFontEngine();
 
-	char score[1000] = "Score: ";
-	char scoreint[4];
-	sprintf_s(scoreint, sizeof(scoreint), "%d", score_);
-	strcat_s(score, scoreint);
-	const char *livesText = score;
-	int textWidth = fontEngine->CalculateTextWidth(livesText, FontEngine::FONT_TYPE_SMALL);
+	std::string score= "Score: "+to_string(score_);
+	int textWidth = fontEngine->CalculateTextWidth(score, FontEngine::FONT_TYPE_SMALL);
 	int textX = 800 - textWidth*2;
 	int textY = 22;
-	fontEngine->DrawText(livesText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
+	fontEngine->DrawText(score, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_SMALL);
 }
+
+
 
 void Game::InitialiseLevel(int level)
 {

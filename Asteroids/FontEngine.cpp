@@ -218,7 +218,7 @@ int FontEngine::DrawText(const std::string &text,
 		d3dDeviceContext_->Draw(copiedRange.end - copiedRange.begin, copiedRange.begin);
 
 		std::chrono::high_resolution_clock::time_point t = std::chrono::high_resolution_clock::now();
-		int val = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t - prevTime).count();
+		float val = (float)std::chrono::duration_cast<std::chrono::milliseconds>(t - prevTime).count();
 		prevTime = t;
 		d3dDeviceContext_->UpdateSubresource(pConstants.Get(), 0, 0, &(val), 4, 4);
 
