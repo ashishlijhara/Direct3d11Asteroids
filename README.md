@@ -15,6 +15,6 @@ Space or Left Mouse Button - Shoot.
 Numpad 1, Numpad 2, Numpad 3, Numpad 4 - Switch weapons.
 ```
 
-# TOOD
+# TODO
 
 Switch to Component Design Pattern
