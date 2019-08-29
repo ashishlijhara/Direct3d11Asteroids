@@ -18,6 +18,9 @@ class Graphics;
 class GameEntity;
 class UFO;
 
+//Components
+class PlayerInputComponent;
+
 class Game
 {
 public:
@@ -36,6 +39,11 @@ public:
 
 	const int& GetScore();
 	void ResetScore();
+
+	Ship*const GetPlayer() const;
+	void WrapEntity(GameEntity *entity) const;
+	void SpawnBullet(XMVECTOR position, XMVECTOR direction);
+	
 private:
 	Game(const Game &);
 	void operator=(const Game &);
@@ -52,12 +60,10 @@ private:
 	//Update Explosions
 	void UpdateExplosions(System* system);
 
-	void WrapEntity(GameEntity *entity) const;
-
 	void DeleteAllAsteroids();
 	void DeleteAllExplosions();
 
-	void SpawnBullet(XMVECTOR position, XMVECTOR direction);
+	
 	void DeleteExplosion(Explosion* explosion);
 	//void DeleteBullet();
 
@@ -93,21 +99,8 @@ private:
 	void DeleteBullet(Bullet *bullet);
 	void DeleteAllBullets();
 
-	double spawnBulletAfter_;
-	double elapsedTime_;
-
-
-	// Bullet Shoot Mode Logic
-	enum ShootMode {
-		Single,
-		Spiral,
-		MultiSpiral,
-		Three
-	};
-
-	ShootMode shootMode_;
-	float shootRot_ = 0;
-	XMVECTOR RotateVectorBy(const float& angle) const;
+	PlayerInputComponent* playerInput;
+	
 
 	//Score Logic
 	int score_;

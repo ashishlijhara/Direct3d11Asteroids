@@ -25,6 +25,12 @@
     <Filter Include="Graphics\Fonts">
       <UniqueIdentifier>{b92f238f-c0be-430d-b271-867bcfacd543}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{78b5f72a-80ce-4dc2-aabc-2428ccf8cc13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Input">
+      <UniqueIdentifier>{d9ed0537-acf7-4dfc-b85d-734e4160d302}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -129,6 +135,9 @@
     <ClCompile Include="Score.cpp" />
     <ClCompile Include="HighScore.cpp" />
     <ClCompile Include="UFO.cpp" />
+    <ClCompile Include="PlayerInputComponent.cpp">
+      <Filter>Components\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainWindow.h">
@@ -243,6 +252,12 @@
     <ClInclude Include="Score.h" />
     <ClInclude Include="HighScore.h" />
     <ClInclude Include="UFO.h" />
+    <ClInclude Include="InputComponent.h">
+      <Filter>Components\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerInputComponent.h">
+      <Filter>Components\Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader_FvfXyzDiffuse.hlsl">

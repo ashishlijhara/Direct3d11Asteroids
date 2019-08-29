@@ -107,6 +107,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="PixelShader.cpp" />
+    <ClCompile Include="PlayerInputComponent.cpp" />
     <ClCompile Include="PlayingState.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="ResourceLoader.cpp" />
@@ -131,6 +132,7 @@
     <ClInclude Include="HighScore.h" />
     <ClInclude Include="ImmediateMode.h" />
     <ClInclude Include="ImmediateModeVertex.h" />
+    <ClInclude Include="InputComponent.h" />
     <ClInclude Include="Maths.h" />
     <ClInclude Include="MatrixBuffer.h" />
     <ClInclude Include="OrthoCamera.h" />
@@ -147,6 +149,7 @@
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="PixelShader.h" />
+    <ClInclude Include="PlayerInputComponent.h" />
     <ClInclude Include="PlayingState.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="resource.h" />

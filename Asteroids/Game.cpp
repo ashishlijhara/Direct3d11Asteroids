@@ -17,15 +17,14 @@
 #include <string>
 #include <algorithm>
 
+#include"PlayerInputComponent.h"
+
 Game::Game() :
 	camera_(0),
 	background_(0),
 	player_(0),
 	collision_(0),
 	//bullet_(0)
-	elapsedTime_(0),
-	spawnBulletAfter_(1),
-	shootMode_(ShootMode::Single),
 	score_(0),
 	ufo_(0)
 {
@@ -34,6 +33,7 @@ Game::Game() :
 	camera_->SetFrustum(800.0f, 600.0f, -100.0f, 100.0f);
 	background_ = new Background(800.0f, 600.0f);
 	collision_ = new Collision();
+	playerInput = new PlayerInputComponent();
 }
 
 Game::~Game()
@@ -53,9 +53,13 @@ const int& Game::GetScore() { return score_; }
 
 void Game::ResetScore() { score_ = 0; }
 
+Ship * const Game::GetPlayer() const
+{
+	return player_;
+}
+
 void Game::Update(System *system)
 {
-	
 	background_->Update(system);
 	UpdatePlayer(system);
 	UpdateAsteroids(system);
@@ -236,87 +240,7 @@ void Game::UpdatePlayer(System *system)
 	if (player_ == 0)
 		return;
 
-	Keyboard *keyboard = system->GetKeyboard();
-
-	float acceleration = 0.0f;
-	if (keyboard->IsKeyHeld(VK_UP) || keyboard->IsKeyHeld('W'))
-	{
-		acceleration = 1.0f;
-	}
-	else if (keyboard->IsKeyHeld(VK_DOWN) || keyboard->IsKeyHeld('S'))
-	{
-		acceleration = -1.0f;
-	}
-
-	float rotation = 0.0f;
-	if (keyboard->IsKeyHeld(VK_RIGHT) || keyboard->IsKeyHeld('D'))
-	{
-		rotation = -1.0f;
-	}
-	else if (keyboard->IsKeyHeld(VK_LEFT) || keyboard->IsKeyHeld('A'))
-	{
-		rotation = 1.0f;
-	}
-
-	player_->SetControlInput(acceleration, rotation);
-	player_->Update(system);
-	WrapEntity(player_);
-
-	//Switch Shoot Modes
-	if (keyboard->IsKeyPressed(VK_NUMPAD1)) {
-		shootMode_ = ShootMode::Single;
-		spawnBulletAfter_ = 1;
-	}
-	else if (keyboard->IsKeyPressed(VK_NUMPAD2)) {
-		shootMode_ = ShootMode::Spiral;
-		spawnBulletAfter_ = 0.25;
-	}
-	else if (keyboard->IsKeyPressed(VK_NUMPAD3)) {
-		shootMode_ = ShootMode::MultiSpiral;
-		spawnBulletAfter_ = 0.05;
-	}
-	else if (keyboard->IsKeyPressed(VK_NUMPAD4)) {
-		shootMode_ = ShootMode::Three;
-		spawnBulletAfter_ = 0.5;
-	}
-
-	//if (keyboard->IsKeyPressed(VK_SPACE))
-	//if(keyboard->IsKeyHeld(VK_SPACE) && (elapsedTime_>spawnBulletAfter_))
-	if ((keyboard->IsKeyHeld(VK_LBUTTON) || keyboard->IsKeyHeld(VK_SPACE)) && (elapsedTime_ > spawnBulletAfter_))
-	{
-		elapsedTime_ = 0;
-		XMVECTOR playerForward = player_->GetForwardVector();
-		XMVECTOR bulletPosition = player_->GetPosition() + playerForward * 10.0f;
-		switch (shootMode_)
-		{
-		case ShootMode::Single:
-			SpawnBullet(bulletPosition, playerForward);
-			break;
-		case ShootMode::Spiral:
-			shootRot_ += 25;
-			SpawnBullet(bulletPosition, RotateVectorBy(shootRot_));
-			break;
-		case ShootMode::MultiSpiral:
-			shootRot_ += 1.5;
-			SpawnBullet(bulletPosition, RotateVectorBy(shootRot_));
-			break;
-		case ShootMode::Three:
-			SpawnBullet(bulletPosition, playerForward);
-			SpawnBullet(bulletPosition,RotateVectorBy(45));
-			SpawnBullet(bulletPosition, RotateVectorBy(-45));
-			break;
-		}
-	}
-	elapsedTime_ += (double)system->GetFrameDeltaTime()/100;
-}
-
-XMVECTOR Game::RotateVectorBy(const float& angle) const{
-	float rotation = Maths::WrapModulo(player_->GetRotation() + angle, Maths::TWO_PI);
-	XMFLOAT3 playerLeft;
-	XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation);
-	XMVECTOR rotatedVec = XMVector3TransformNormal(XMVectorSet(0.f, 1.0f, 0.0f, 0.0f), rotationMatrix);
-	rotatedVec = XMVector3Normalize(rotatedVec);
-	return rotatedVec;
+	playerInput->Update(this, system);
 }
 
 void Game::UpdateAsteroids(System *system)
