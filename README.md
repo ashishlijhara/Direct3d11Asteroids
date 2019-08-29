@@ -14,3 +14,7 @@ W,A,S,D or arrow Keys - Move.
 Space or Left Mouse Button - Shoot.
 Numpad 1, Numpad 2, Numpad 3, Numpad 4 - Switch weapons.
 ```
+
+# TOOD
+
+Switch to Component Design Pattern
